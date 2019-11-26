@@ -68,12 +68,13 @@ pub fn part2(input: &[Claim]) -> usize {
 }
 
 #[cfg(test)]
-const HINT_INPUT: &'static str = r#"#1 @ 1,3: 4x4
+const HINT_INPUT: &'static str = r#"
+#1 @ 1,3: 4x4
 #2 @ 3,1: 4x4
 #3 @ 5,5: 2x2
 "#;
 
 #[test]
 pub fn test_example() {
-    assert_eq!(part1(&gen(HINT_INPUT)), 4);
+    assert_eq!(part1(&gen(HINT_INPUT.trim())), 4);
 }
