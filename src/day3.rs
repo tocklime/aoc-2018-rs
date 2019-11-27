@@ -1,4 +1,5 @@
 use parse_display::{Display, FromStr};
+use std::collections::HashMap;
 
 #[derive(Display, FromStr, PartialEq, Debug)]
 #[display("#{id} @ {left},{top}: {width}x{height}")]
@@ -24,6 +25,16 @@ impl Claim {
     }
 }
 
+/*
+impl IntoIterator for Claim {
+    type Item = (usize, usize);
+    type IntoIter = ::std::iter::FlatMap<::std::ops::Range<usize>, Self, FnMut(????) -> ????>;
+    fn into_iter(self) -> Self::IntoIter {
+        (self.left..self.right()).flat_map(|x| (self.top..self.bottom()).map(|y| (x, y)))
+    }
+}
+*/
+
 #[aoc_generator(day3)]
 pub fn gen(input: &str) -> Vec<Claim> {
     input
@@ -37,8 +48,8 @@ pub fn part1(input: &[Claim]) -> usize {
     let mut grid = [[0 as u8; 1000]; 1000];
     let mut count = 0;
     for c in input {
-        for x in c.left..(c.left + c.width) {
-            for y in c.top..(c.top + c.height) {
+        for x in c.left..c.right() {
+            for y in c.top..c.bottom() {
                 if grid[x][y] == 1 {
                     count += 1;
                 }
@@ -51,7 +62,7 @@ pub fn part1(input: &[Claim]) -> usize {
 
 use std::collections::HashSet;
 
-#[aoc(day3, part2)]
+#[aoc(day3, part2, pairwise)]
 pub fn part2(input: &[Claim]) -> usize {
     let mut candidates: HashSet<usize> = input.iter().map(|c| c.id).collect();
     for c1ix in 0..input.len() {
@@ -65,6 +76,12 @@ pub fn part2(input: &[Claim]) -> usize {
         }
     }
     *candidates.iter().nth(0).expect("Not found")
+}
+
+#[aoc(day3, part2, map)]
+pub fn part2_map(input: &[Claim]) -> usize {
+    //let mut grid = HashMap::new();
+    5
 }
 
 #[cfg(test)]
