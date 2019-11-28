@@ -23,17 +23,12 @@ impl Claim {
         let intersects_y = self.bottom() >= other.top && self.top <= other.bottom();
         intersects_x && intersects_y
     }
-}
-
-/*
-impl IntoIterator for Claim {
-    type Item = (usize, usize);
-    type IntoIter = ::std::iter::FlatMap<::std::ops::Range<usize>, Self, FnMut(????) -> ????>;
-    fn into_iter(self) -> Self::IntoIter {
-        (self.left..self.right()).flat_map(|x| (self.top..self.bottom()).map(|y| (x, y)))
+    fn squares (self: &Self) -> impl Iterator<Item = (usize,usize)> + '_
+    {
+        (self.left..self.right())
+            .flat_map(move |x| (self.top..self.bottom()).map(move |y| (x,y)))
     }
 }
-*/
 
 #[aoc_generator(day3)]
 pub fn gen(input: &str) -> Vec<Claim> {
@@ -43,22 +38,49 @@ pub fn gen(input: &str) -> Vec<Claim> {
         .collect()
 }
 
-#[aoc(day3, part1)]
+#[aoc(day3, part1, arr)]
 pub fn part1(input: &[Claim]) -> usize {
     let mut grid = [[0 as u8; 1000]; 1000];
     let mut count = 0;
     for c in input {
-        for x in c.left..c.right() {
-            for y in c.top..c.bottom() {
-                if grid[x][y] == 1 {
-                    count += 1;
-                }
-                grid[x][y] += 1;
+        for (x,y) in c.squares() {
+            if grid[x][y] == 1 {
+                count += 1;
             }
+            grid[x][y] += 1;
         }
     }
     return count;
 }
+#[aoc(day3, part1, vec)]
+pub fn part1_vec(input: &[Claim]) -> usize {
+    let mut grid = vec![vec![0 as u8; 1000]; 1000];
+    let mut count = 0;
+    for c in input {
+        for (x,y) in c.squares() {
+            if grid[x][y] == 1 {
+                count += 1;
+            }
+            grid[x][y] += 1;
+        }
+    }
+    return count;
+}
+#[aoc(day3, part1, hashmap)]
+pub fn part1_hm(input: &[Claim]) -> usize {
+    let mut grid = std::collections::HashMap::new();
+    let mut count = 0;
+    for c in input {
+        for p in c.squares() {
+            if grid.get(&p) == Some(&1) {
+                count += 1;
+            }
+            *grid.entry(p).or_insert(0) += 1;
+        }
+    }
+    return count;
+}
+
 
 use std::collections::HashSet;
 
@@ -80,8 +102,20 @@ pub fn part2(input: &[Claim]) -> usize {
 
 #[aoc(day3, part2, map)]
 pub fn part2_map(input: &[Claim]) -> usize {
-    //let mut grid = HashMap::new();
-    5
+    let mut grid = HashMap::new();
+    let mut candidates : HashSet<usize> = input.iter().map(|c| c.id).collect();
+    for c in input {
+        for p in c.squares() {
+            match grid.get(&p) {
+                Some(o_id) => {
+                    candidates.remove(o_id);
+                    candidates.remove(&c.id);
+                },
+                None => {grid.insert(p, c.id);}
+            }
+        }
+    }
+    *candidates.iter().nth(0).expect("Not found")
 }
 
 #[cfg(test)]
