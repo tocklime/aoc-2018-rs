@@ -111,14 +111,47 @@ pub fn part1(input: &[LogLine]) -> Answer {
         minute: m,
     }
 }
+#[aoc(day4, part2)]
+pub fn part2(input: &[LogLine]) -> Answer {
+    let mut hm = std::collections::HashMap::new();
+    let mut guard_id = 0;
+    let mut asleep_at = 0;
+    for i in input {
+        match i.event {
+            LogEvent::BeginShift { guard_id: g_id } => guard_id = g_id,
+            LogEvent::Asleep => asleep_at = i.minute,
+            LogEvent::Wakes => {
+                for i in asleep_at..i.minute {
+                    *hm.entry((guard_id, i)).or_insert(0) += 1;
+                }
+            }
+        }
+    }
+    let ((g, m), _) = hm.iter().max_by_key(|x| x.1).expect("no lines");
+    Answer {
+        guard_id: *g,
+        minute: *m,
+    }
+}
 
 #[test]
-fn test_example1() {
+fn test_part1() {
     assert_eq!(
         part1(&gen(HINT_INPUT)),
         Answer {
             guard_id: 10,
             minute: 24
+        }
+    )
+}
+
+#[test]
+fn test_part2() {
+    assert_eq!(
+        part2(&gen(HINT_INPUT)),
+        Answer {
+            guard_id: 99,
+            minute: 45
         }
     )
 }
